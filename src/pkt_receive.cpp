@@ -31,13 +31,15 @@ void Pkt_Receive::startReceiving() {
 
 void Pkt_Receive::handleIncomingPacket(const boost::system::error_code& error, std::size_t bytes_received) {
     if (is_running) {
-        std::cerr << "Received " << bytes_received << " bytes" << std::endl;
+        // std::cerr << "Received " << bytes_received << " bytes" << std::endl;
         if (!error) {
             // Process the received packet
             std::string payload(buffer.data(), bytes_received);
 
             if (bytes_received == PKT_PAYLOAD_LENGTH) {
-                Pkt_Payload bitset_data(payload);
+                Pkt_Payload bitset_data;
+                std::transform(payload.begin(), payload.end(), bitset_data.begin(),
+                               [](char c) { return std::byte(c); });
                 {
                     std::unique_lock<std::mutex> lock(payload_queue_mutex);
                     payload_queue.push(bitset_data);

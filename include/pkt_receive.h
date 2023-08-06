@@ -3,6 +3,7 @@
 
 #include "cfg.h"
 #include "pkt_def.h"
+#include <algorithm>
 #include <boost/asio.hpp>
 #include <iostream>
 #include <queue>

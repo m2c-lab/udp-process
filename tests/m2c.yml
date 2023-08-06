@@ -2,9 +2,9 @@
 
 receive:
   local:
-    ip: 192.168.10.199
+    ip: 192.168.1.199
     port: 1234
   remote:
-    ip: 192.168.10.128
+    ip: 192.168.1.128
     port: 1234
   timeout: 100000 # 100ms

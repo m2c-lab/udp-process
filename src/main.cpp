@@ -54,7 +54,10 @@ int main(int argc, char* argv[]) {
             std::cout << visible << std::endl;
             return 0;
         }
-        if (vm.count("version")) { std::cout << "0.1.0" << std::endl; }
+        if (vm.count("version")) {
+            std::cout << "M2C UDP Process 0.1.0" << std::endl;
+            return 0;
+        }
         po::notify(vm);
     } catch (const std::exception& e) {
         std::string s = e.what();
