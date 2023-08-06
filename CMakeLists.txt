@@ -1,12 +1,13 @@
 cmake_minimum_required(VERSION 3.13)
 
-project(m2c-udp-process VERSION 0.1.0)
+project(m2c-udp-process VERSION 0.1.0 LANGUAGES CXX)
 
 # Default as Release
 if (NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "")
     set(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
 endif()
 
+find_package(ryml REQUIRED)
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_NO_WARN_NEW_VERSIONS ON)
 if (UNIX AND NOT APPLE) # Linux
@@ -55,8 +56,15 @@ if (MMCESIM_BUILD_ASTYLE)
 endif()
 
 set(SOURCES
+    "src/pkt_receive.cpp"
+    "src/pkt_parse.cpp"
+    "src/cli_cmd.cpp"
+    "src/cfg_read.cpp"
     "src/main.cpp"
 )
-add_executable(m2c-udp-process ${SOURCES})
+add_executable(${PROJECT_NAME} ${SOURCES})
 
-
+target_link_libraries(${PROJECT_NAME} LINK_PUBLIC ${Boost_LIBRARIES} ryml::ryml)
+if (USE_THREADS)
+    target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
+endif()

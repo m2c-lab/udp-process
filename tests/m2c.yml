@@ -1,0 +1,10 @@
+# M2C Configuration File
+
+receive:
+  local:
+    ip: 192.168.10.199
+    port: 1234
+  remote:
+    ip: 192.168.10.128
+    port: 1234
+  timeout: 100000 # 100ms
