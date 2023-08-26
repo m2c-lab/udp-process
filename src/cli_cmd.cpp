@@ -4,14 +4,11 @@
 void cmd_receive(const CLI_Options& opt) {
     auto cfg = cfg_read(opt);
     Pkt_Receive r(cfg);
+    Pkt_Parse p(r, payload_queue_mutex);
+    std::thread parser(&Pkt_Parse::parse, &p);
     r.startReceiving();
-    // r.stopReceiving();
 
-    {
-        std::unique_lock<std::mutex> lock(payload_queue_mutex);
-        auto&& queue = r.getPayloadQueue();
-        std::cout << "Number of Payloads: " << queue.size() << std::endl;
-    }
+    parser.join();
 }
 
 void cmd_convert(const CLI_Options& opt) {}

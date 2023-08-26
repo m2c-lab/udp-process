@@ -59,6 +59,8 @@ void Pkt_Receive::handleIncomingPacket(const boost::system::error_code& error, s
 
 void Pkt_Receive::stopReceiving() { is_running = false; }
 
+bool Pkt_Receive::isRunning() noexcept { return is_running; }
+
 std::queue<Pkt_Payload>& Pkt_Receive::getPayloadQueue() { return payload_queue; }
 
 void Pkt_Receive::processIOContext() {

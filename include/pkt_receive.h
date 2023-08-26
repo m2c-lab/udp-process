@@ -18,6 +18,7 @@ class Pkt_Receive {
     Pkt_Receive(const Cfg& cfg);
     void startReceiving();
     void stopReceiving();
+    bool isRunning() noexcept;
     std::queue<Pkt_Payload>& getPayloadQueue(); // Return a reference
 
   private:

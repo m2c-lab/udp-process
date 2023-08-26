@@ -31,7 +31,7 @@ Cfg cfg_read(const CLI_Options& opt) {
         std::cout << "  r.local.port: " << cfg.r.local_port << std::endl;
         std::cout << "  r.remote.ip: " << cfg.r.remote_ip << std::endl;
         std::cout << "  r.remote.port: " << cfg.r.remote_port << std::endl;
-        std::cout << "  r.timeout: " << timeout_n << std::endl;
+        std::cout << "  r.timeout: " << cfg.r.timeout << std::endl;
     }
 
     return cfg;
