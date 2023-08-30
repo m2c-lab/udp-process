@@ -56,8 +56,12 @@ if __name__ == '__main__':
     CIR_I = []
     CIR_Q = []
     for i in range(0, 256):
-        CIR_I.append(np.int16(CIR[i] >> 16))
-        CIR_Q.append(np.int16(CIR[i] & 0xffff))
+        # Extract the 16-bit signed integer I and Q components from the 32-bit value
+        Q_component = np.int16(CIR[i] & 0xffff)  # Mask the lower 16 bits
+        I_component = np.int16(CIR[i] >> 16)     # Shift and mask the higher 16 bits
+
+        CIR_I.append(I_component)
+        CIR_Q.append(Q_component)
 
     # plot
     plt.figure(figsize=(10, 5))

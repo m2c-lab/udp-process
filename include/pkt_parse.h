@@ -37,7 +37,7 @@ class Pkt_Parse {
       private:
         uint32_t bytesToUInt32(const std::array<std::byte, 4>& bytes);
 
-        uint32_t strToUInt32(const std::string& str);
+        uint32_t strToUInt32(const std::string& str, bool swap = true);
 
     } data;
 };

@@ -56,10 +56,10 @@ bool Pkt_Parse::parse() {
 
 Pkt_Parse::Data::Data(const Pkt_Payload& payload) { // payload is an std::array of std::byte.
     // timestamp is the bytes 2-5
-    timestamp = strToUInt32(payload.substr(2, 4));
+    timestamp = strToUInt32(payload.substr(2, 4), false);
     // noise is the bytes 6-7
     noise = strToUInt32(std::string(2, '\0').append(payload.substr(6, 2)));
-    for (size_t i = 0; i != CIR_LENGTH; ++i) { CIR[i] = strToUInt32(payload.substr(CIR_BEGIN_BYTE_N + i, 4)); }
+    for (size_t i = 0; i != CIR_LENGTH; ++i) { CIR[i] = strToUInt32(payload.substr(CIR_BEGIN_BYTE_N + i * 4, 4)); }
     // std::cout << timestamp << std::endl;
 }
 
@@ -79,10 +79,10 @@ uint32_t Pkt_Parse::Data::bytesToUInt32(const std::array<std::byte, 4>& bytes) {
     return value;
 }
 
-uint32_t Pkt_Parse::Data::strToUInt32(const std::string& str) {
+uint32_t Pkt_Parse::Data::strToUInt32(const std::string& str, bool swap) {
     assert(str.size() == 4); // str must be length of 4
-    return (static_cast<uint32_t>(static_cast<uint8_t>(str[0])) << 24) |
-           (static_cast<uint32_t>(static_cast<uint8_t>(str[1])) << 16) |
-           (static_cast<uint32_t>(static_cast<uint8_t>(str[2])) << 8) |
-           static_cast<uint32_t>(static_cast<uint8_t>(str[3]));
+    return (static_cast<uint32_t>(static_cast<uint8_t>(str[swap ? 1 : 0])) << 24) |
+           (static_cast<uint32_t>(static_cast<uint8_t>(str[swap ? 0 : 1])) << 16) |
+           (static_cast<uint32_t>(static_cast<uint8_t>(str[swap ? 3 : 2])) << 8) |
+           static_cast<uint32_t>(static_cast<uint8_t>(str[swap ? 2 : 3]));
 }
