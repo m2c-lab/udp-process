@@ -7,7 +7,8 @@ import sys
 import time
 import datetime
 import numpy as np
-
+# plot
+import matplotlib.pyplot as plt
 
 def read_parquet_file(file_path):
     """
@@ -38,6 +39,25 @@ if __name__ == '__main__':
 
     # print the data table
     print_table(df)
+
+    # get the CIR of a row
+    CIR = df.iloc[2, 2:258]
+
+    # Get I and Q data, from column CIR0 to CIR255.
+    # Each data is 32 bits, and I has the higher 16 bits, Q has the lower 16 bits, interpret as 16-bit signed integer.
+    CIR_I = []
+    CIR_Q = []
+    for i in range(0, 256):
+        CIR_I.append(np.int16(CIR[i] >> 16))
+        CIR_Q.append(np.int16(CIR[i] & 0xffff))
+
+    # plot
+    plt.figure(figsize=(10, 5))
+    plt.plot(CIR_I, label='I')
+    plt.plot(CIR_Q, label='Q')
+    plt.legend()
+    plt.show()
+
 
     # end time
     end_time = time.time()
