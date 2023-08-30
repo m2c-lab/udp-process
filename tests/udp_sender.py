@@ -8,12 +8,14 @@ import socket
 import time
 import argparse
 
-message = "#" + "0" * 1039 # 1040 bytes
+message = b"\x31\xd4\x91\xb2\x34\x01\xd2\x04" + b"\x00" * 1032
+
+print(len(message))
 
 def send_udp_packet(host, port, data, quiet=False):
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.sendto(data.encode(), (host, port))
+        sock.sendto(data, (host, port))
         if not quiet:
             print(f"Sent packet with length {len(data)} to {host}:{port}")
     except Exception as e:
