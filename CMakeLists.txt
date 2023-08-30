@@ -21,6 +21,10 @@ else()
         COMPONENTS iostreams program_options filesystem
     )
 endif()
+set(ARROW_HTTP OFF CACHE BOOL "Do not want http" FORCE)
+set(ARROW_WITH_CURL OFF CACHE BOOL "Do not want curl dependency" FORCE)
+find_package(Arrow REQUIRED)
+find_package(Parquet REQUIRED)
 
 if (UNIX)
     set(USE_THREADS TRUE BOOL "Use Threads in Unix")
@@ -39,7 +43,7 @@ include_directories(
 )
 link_directories(${Boost_LIBRARY_DIRS})
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
@@ -51,10 +55,6 @@ if (NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     set(CMAKE_CXX_FLAGS -Wno-error=narrowing)
 endif()
 
-if (MMCESIM_BUILD_ASTYLE)
-    add_subdirectory(ext/astyle)
-endif()
-
 set(SOURCES
     "src/pkt_receive.cpp"
     "src/pkt_parse.cpp"
@@ -64,7 +64,8 @@ set(SOURCES
 )
 add_executable(${PROJECT_NAME} ${SOURCES})
 
-target_link_libraries(${PROJECT_NAME} LINK_PUBLIC ${Boost_LIBRARIES} ryml::ryml)
+target_link_libraries(${PROJECT_NAME} LINK_PRIVATE ${Boost_LIBRARIES} ryml::ryml
+    CURL::libcurl Arrow::arrow_shared Parquet::parquet_shared)
 if (USE_THREADS)
     target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
 endif()

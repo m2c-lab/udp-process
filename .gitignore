@@ -35,5 +35,8 @@
 /bin
 /build
 
+# Dataset Output
+*.parquet
+
 # macOS
 .DS_Store
