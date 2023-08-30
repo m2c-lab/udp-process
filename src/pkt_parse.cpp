@@ -1,76 +1,57 @@
 #include "pkt_parse.h"
-// #include <arrow/api.h>
-// #include <arrow/io/api.h>
-// #include <parquet/arrow/reader.h>
-// #include <parquet/arrow/writer.h>
-// #include <parquet/exception.h>
-
-
-// using parquet::ArrowWriterProperties;
 
 Pkt_Parse::Pkt_Parse(Pkt_Receive& pkt_receive, std::mutex& mtx_pkt_receive)
-    : pkt_receive(pkt_receive), mtx_pkt_receive(mtx_pkt_receive), writer_props(
-        parquet::WriterProperties::Builder()
-            .created_by("M2C UDP Process")
-            // ->max_row_group_length(10000)
-            // ->version(parquet::ParquetVersion::PARQUET_2_6)
-            // ->data_page_version(parquet::ParquetDataPageVersion::V2)
-            // ->compression(parquet::Compression::SNAPPY)
-            ->compression(parquet::Compression::UNCOMPRESSED)
-            ->build()
-) {
-    PARQUET_ASSIGN_OR_THROW(outfile, arrow::io::FileOutputStream::Open("test1.parquet"));
-    parquet::schema::NodeVector fields;
-    fields.push_back(parquet::schema::PrimitiveNode::Make(
-        "timestamp", parquet::Repetition::REQUIRED, parquet::Type::INT32, parquet::ConvertedType::INT_32));
-    // fields.push_back(parquet::schema::PrimitiveNode::Make(
-        // "noise", parquet::Repetition::REQUIRED, parquet::Type::INT32, parquet::ConvertedType::INT_32));
-    // for (size_t i = 0; i != CIR_LENGTH; ++i) {
-    //     fields.push_back(parquet::schema::PrimitiveNode::Make(
-    //         "CIR" + std::to_string(i), parquet::Repetition::REQUIRED, parquet::Type::INT32, parquet::ConvertedType::UINT_32));
-    // }
-    writer_schema = std::static_pointer_cast<parquet::schema::GroupNode>(
-    parquet::schema::GroupNode::Make("UDP Payload", parquet::Repetition::REQUIRED, fields));
-}
+    : pkt_receive(pkt_receive), mtx_pkt_receive(mtx_pkt_receive) {}
 
 bool Pkt_Parse::parse() {
-    parquet::StreamWriter os{ parquet::ParquetFileWriter::Open(outfile, writer_schema, writer_props) };
+    parquet::WriterProperties::Builder builder;
+    builder.created_by("M2C UDP Process")
+        ->max_row_group_length(10000)
+        ->data_page_version(parquet::ParquetDataPageVersion::V2)
+        ->compression(parquet::Compression::SNAPPY);
+    std::shared_ptr<parquet::schema::GroupNode> writer_schema;
+    std::shared_ptr<arrow::io::FileOutputStream> outfile;
+    PARQUET_ASSIGN_OR_THROW(outfile, arrow::io::FileOutputStream::Open("test1.parquet"));
+    parquet::schema::NodeVector fields;
+    fields.push_back(parquet::schema::PrimitiveNode::Make("timestamp", parquet::Repetition::REQUIRED,
+                                                          parquet::Type::INT32, parquet::ConvertedType::UINT_32));
+    fields.push_back(parquet::schema::PrimitiveNode::Make("noise", parquet::Repetition::REQUIRED, parquet::Type::INT32,
+                                                          parquet::ConvertedType::UINT_32));
+    for (size_t i = 0; i != CIR_LENGTH; ++i) {
+        fields.push_back(parquet::schema::PrimitiveNode::Make("CIR" + std::to_string(i), parquet::Repetition::REQUIRED,
+                                                              parquet::Type::INT32, parquet::ConvertedType::UINT_32));
+    }
+    writer_schema = std::static_pointer_cast<parquet::schema::GroupNode>(
+        parquet::schema::GroupNode::Make("UDP Payload", parquet::Repetition::REQUIRED, fields));
+    parquet::StreamWriter os{ parquet::ParquetFileWriter::Open(outfile, writer_schema, builder.build()) };
     while (true) {
         std::unique_lock<std::mutex> lock(mtx_pkt_receive);
         auto&& queue = pkt_receive.getPayloadQueue();
         if (auto queue_size = queue.size(); queue_size > 0) {
-            std::cout << "Number of Payloads: " << queue_size << std::endl;
+            // std::cout << "Number of Payloads: " << queue_size << std::endl;
             auto payload = queue.front();
             queue.pop();
             Data data(payload);
-            // os << data.timestamp << data.noise;
             try {
-                // os << int32_t(1) << int32_t(2);
-                os << int32_t(1);
-                std::cout << data.timestamp << ' ' << data.noise << std::endl;
-
-                // for (auto&& cir : data.CIR) os << cir;
+                os << data.timestamp << data.noise;
+                // std::cout << data.timestamp << ' ' << data.noise << std::endl;
+                for (auto&& cir : data.CIR) os << cir;
                 os << parquet::EndRow;
-                // os.EndRow();
-            } catch (...) {
+            } catch (const std::exception& e) {
                 std::cerr << "Error writing to parquet file." << std::endl;
+                std::cerr << e.what() << std::endl;
                 return false;
             }
         } else if (!pkt_receive.isRunning()) {
-            std::cout << "Finished parsing and receiving has stopped." << std::endl;
+            std::cout << "Finished parsing." << std::endl;
             break;
         }
     }
     os.EndRowGroup();
-    // outfile->CloseAsync();
-    if (outfile->Close().ok()) {
-        std::cout << "n_cols: " << os.num_columns() << std::endl;
-        std::cout << "cu_row: " << os.current_row() << std::endl;
-        return true;
-    } else {
-        std::cerr << "File Close Not OK!" << std::endl;
-        return false;
-    }
+    // std::cout << "n_cols: " << os.num_columns() << std::endl;
+    // std::cout << "n_rows: " << os.current_row() << std::endl;
+    std::cout << "Total number of packets saved: " << os.current_row() << std::endl;
+    return true;
 }
 
 Pkt_Parse::Data::Data(const Pkt_Payload& payload) { // payload is an std::array of std::byte.
@@ -78,9 +59,7 @@ Pkt_Parse::Data::Data(const Pkt_Payload& payload) { // payload is an std::array 
     timestamp = strToUInt32(payload.substr(2, 4));
     // noise is the bytes 6-7
     noise = strToUInt32(std::string(2, '\0').append(payload.substr(6, 2)));
-    for (size_t i = 0; i != CIR_LENGTH; ++i) {
-        CIR[i] = strToUInt32(payload.substr(CIR_BEGIN_BYTE_N + i, 4));
-    }
+    for (size_t i = 0; i != CIR_LENGTH; ++i) { CIR[i] = strToUInt32(payload.substr(CIR_BEGIN_BYTE_N + i, 4)); }
     // std::cout << timestamp << std::endl;
 }
 
@@ -88,7 +67,7 @@ uint32_t Pkt_Parse::Data::bytesToUInt32(const std::array<std::byte, 4>& bytes) {
     uint32_t value;
     if constexpr (std::endian::native == std::endian::big) {
         auto reverse = [](const std::array<std::byte, 4>& src, std::array<std::byte, 4>& dst) {
-            std::copy(src.rbegin(), src.rend(), dst.begin()); 
+            std::copy(src.rbegin(), src.rend(), dst.begin());
         };
         std::array<std::byte, 4> reversed;
         reverse(bytes, reversed);

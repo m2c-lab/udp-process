@@ -1,5 +1,6 @@
 {
     "files.associations": {
+        "*.sim": "yaml",
         "cctype": "cpp",
         "clocale": "cpp",
         "cmath": "cpp",
@@ -67,6 +68,7 @@
         "variant": "cpp",
         "bit": "cpp",
         "unordered_set": "cpp",
-        "*.ipp": "cpp"
+        "*.ipp": "cpp",
+        "__split_buffer": "cpp"
     }
 }

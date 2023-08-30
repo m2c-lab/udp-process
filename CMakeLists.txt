@@ -65,7 +65,10 @@ set(SOURCES
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 target_link_libraries(${PROJECT_NAME} LINK_PRIVATE ${Boost_LIBRARIES} ryml::ryml
-    CURL::libcurl Arrow::arrow_shared Parquet::parquet_shared)
+    Arrow::arrow_shared Parquet::parquet_shared)
+if (UNIX AND NOT APPLE)
+    target_link_libraries(${PROJECT_NAME} PRIVATE CURL::libcurl)
+endif()
 if (USE_THREADS)
     target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
 endif()

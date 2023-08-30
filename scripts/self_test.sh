@@ -3,7 +3,7 @@
 exe_name="bin/m2c-udp-process"
 
 # First setup Python UDP packets sender
-python3 tests/udp_sender.py 127.0.0.1 1234 -q -i1 &
+python3 tests/udp_sender.py 127.0.0.1 1234 -q -i0.1 &
 python_pid=$!
 
 # Then run the test
