@@ -37,7 +37,15 @@ if __name__ == '__main__':
     df = read_parquet_file(file_path)
 
     # print the data table
-    print_table(df)
+    # print_table(df)
+
+    timestamp = df.iloc[0, 0]
+    noise = df.iloc[0, 1]
+    
+    # print timestamp and noise in HEX
+    print('timestamp: ', hex(timestamp))
+    print('noise: ', hex(noise))
+
 
     # end time
     end_time = time.time()

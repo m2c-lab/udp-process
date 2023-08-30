@@ -81,5 +81,8 @@ uint32_t Pkt_Parse::Data::bytesToUInt32(const std::array<std::byte, 4>& bytes) {
 
 uint32_t Pkt_Parse::Data::strToUInt32(const std::string& str) {
     assert(str.size() == 4); // str must be length of 4
-    return str[0] << 24 | str[1] << 16 | str[2] << 8 | str[3];
+    return (static_cast<uint32_t>(static_cast<uint8_t>(str[0])) << 24) |
+           (static_cast<uint32_t>(static_cast<uint8_t>(str[1])) << 16) |
+           (static_cast<uint32_t>(static_cast<uint8_t>(str[2])) << 8) |
+           static_cast<uint32_t>(static_cast<uint8_t>(str[3]));
 }
