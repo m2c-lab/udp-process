@@ -38,5 +38,8 @@
 # Dataset Output
 *.parquet
 
+# Temporary
+_tmp.*
+
 # macOS
 .DS_Store

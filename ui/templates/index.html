@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>M2C UDP Process</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/bootstrap.min.css') }}">
+</head>
+<body>
+    <h1>M2C UDP Process</h1>
+    <input type="text" id="commandInput">
+    <button id="runButton">Run Command</button>
+    <div>
+        <textarea id="outputArea" rows="5" cols="50" readonly></textarea>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src="{{ url_for('static', filename='bootstrap/bootstrap.min.js') }}"></script>
+</body>
+</html>
