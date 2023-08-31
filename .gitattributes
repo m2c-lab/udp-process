@@ -1,3 +1,4 @@
 *.h linguist-language=C++
 
 ui/static/bootstrap linguist-vendored=true
+ui/static/theme.js linguist-vendored=true

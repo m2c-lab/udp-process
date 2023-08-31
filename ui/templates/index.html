@@ -1,18 +1,133 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>M2C UDP Process</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/bootstrap.min.css') }}">
+  <title>M2C UDP Process</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/bootstrap.min.css') }}">
+  <script src="{{ url_for('static', filename='theme.js') }}"></script>
 </head>
-<body>
-    <h1>M2C UDP Process</h1>
-    <input type="text" id="commandInput">
-    <button id="runButton">Run Command</button>
-    <div>
-        <textarea id="outputArea" rows="5" cols="50" readonly></textarea>
+
+<body class="d-flex flex-column min-vh-100">
+  <nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">M2C UDP Process</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText"
+        aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarText">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="#">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">About</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Documentation</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="https://github.com/m2c-lab/udp-process" target="_blank">GitHub</a>
+          </li>
+        </ul>
+        <span class="navbar-text">
+          Version 0.1.0
+        </span>
+      </div>
     </div>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
-    <script src="{{ url_for('static', filename='bootstrap/bootstrap.min.js') }}"></script>
+  </nav>
+  <main class="row mt-4 mx-4 flex-fill">
+    <div class="col col-sm" style="max-width: 40em;">
+      <h3 class="fw-light">CIR Configurations</h3>
+      <hr class="mt-0">
+      <form class="needs-validation" novalidate onsubmit="return false;">
+        <label for="local-ip" class="form-label">Local (PC):</label>
+        <div class="input-group mb-3">
+          <input type="text" class="form-control font-monospace" placeholder="Local IP" aria-label="Local IP" id="local-ip" style="max-width: 15em;" value="192.168.1.199" min="1" max="65535" required pattern="((^|\.)((25[0-5])|(2[0-4]\d)|(1\d\d)|([1-9]?\d))){4}$">
+          <span class="input-group-text">:</span>
+          <input type="number" class="form-control font-monospace" placeholder="Port" aria-label="Local Port" id="local-port" style="max-width: 6.5em;" value="1234" required>
+        </div>
+        <label for="remote-ip" class="form-label">Remote (FPGA):</label>
+        <div class="input-group mb-3">
+          <input type="text" class="form-control font-monospace" placeholder="Remote IP" aria-label="Remote IP" id="remote-ip" style="max-width: 15em;" value="192.168.1.128" min="1" max="65535" required pattern="((^|\.)((25[0-5])|(2[0-4]\d)|(1\d\d)|([1-9]?\d))){4}$">
+          <span class="input-group-text">:</span>
+          <input type="number" class="form-control font-monospace" placeholder="Port" aria-label="Remote Port" id="remote-port" style="max-width: 6.5em;" value="1234" required>
+        </div>
+        <div class="form-group">
+        <label for="timeout">Timeout:</label>
+        <div class="input-group mb-3">
+          <input type="number" class="form-control font-monospace" id="timeout" value="1000000" name="timeout" min="1" style="max-width: 15em;">
+          <span class="input-group-text">μs</span>
+        </div>
+        </div>
+        <button id="runButton" class="btn btn-outline-primary me-2">Receive UDP Packets</button>
+        <button id="run-self-test" class="btn btn-outline-secondary">Run Self Tests</button>
+      </form>
+      <!-- <input type="text" id="commandInput">
+      <button id="runButton" class="btn btn-outline-primary">Run Command</button> -->
+      <br>
+      <div class="btn-group mb-3" role="group" aria-label="Basic outlined example">
+        <button type="button" class="btn btn-sm btn-outline-secondary">Use Default IP Config</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary">Use Self IP Config</button>
+      </div>
+      <div class="form-floating">
+        <textarea id="outputArea" readonly class="form-control font-monospace" style="height: 10em"></textarea>
+        <label for="outputArea">Terminal Output</label>
+      </div>
+      <script src="{{ url_for('static', filename='script.js') }}"></script>
+      <script src="{{ url_for('static', filename='bootstrap/bootstrap.min.js') }}"></script>
+    </div>
+    <div class="col col-lg">
+      <h3 class="fw-light">Output</h3>
+      <hr class="mt-0">
+      <div class="accordion" id="accordionPanelsStayOpenExample">
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
+              <strong>CIR I/Q Data</strong>
+            </button>
+          </h2>
+          <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show">
+            <div class="accordion-body">
+              <strong>This is the first item's accordion body.</strong> It is shown by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false" aria-controls="panelsStayOpen-collapseTwo">
+              <strong>CIR Signal Strength (Linear)</strong>
+            </button>
+          </h2>
+          <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse">
+            <div class="accordion-body">
+              <strong>This is the second item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseThree" aria-expanded="false" aria-controls="panelsStayOpen-collapseThree">
+              <strong>CIR Signal Strength (dB)</strong>
+            </button>
+          </h2>
+          <div id="panelsStayOpen-collapseThree" class="accordion-collapse collapse">
+            <div class="accordion-body">
+              <strong>This is the third item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  <footer>
+    <div class="text-center p-4" style="background-color: rgba(0, 0, 0, 0.05);">
+      © 2023 Copyright:
+      <a class="text-reset fw-bold" href="https://wqzhao.org">Wuqiong Zhao</a>,
+      UC San Diego
+    </div>
+  </footer>
 </body>
+
 </html>
