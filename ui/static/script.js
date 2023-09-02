@@ -1,51 +1,31 @@
 // Example starter JavaScript for disabling form submissions if there are invalid fields
 (() => {
-  'use strict'
+  "use strict";
 
   // Fetch all the forms we want to apply custom Bootstrap validation styles to
-  const forms = document.querySelectorAll('.needs-validation');
+  const forms = document.querySelectorAll(".needs-validation");
 
   // Loop over them and prevent submission
-  Array.from(forms).forEach(form => {
-    form.addEventListener('submit', event => {
-      var custom_valid = true;
-      if (form.getAttribute('id') == 'main_form') {
-        custom_valid = validateEncoderParallelism();
-      }
-      if (!form.checkValidity() || !custom_valid) {
-        event.preventDefault();
-        event.stopPropagation();
-        form.classList.add('was-validated');
-      } else {
-        form.classList.remove('was-validated');
-      }
-    }, false)
-  })
+  Array.from(forms).forEach((form) => {
+    form.addEventListener(
+      "submit",
+      (event) => {
+        var custom_valid = true;
+        if (form.getAttribute("id") == "main_form") {
+          custom_valid = validateEncoderParallelism();
+        }
+        if (!form.checkValidity() || !custom_valid) {
+          event.preventDefault();
+          event.stopPropagation();
+          form.classList.add("was-validated");
+        } else {
+          form.classList.remove("was-validated");
+        }
+      },
+      false
+    );
+  });
 })();
-
-// const commandInput = document.getElementById("commandInput");
-// const runButton = document.getElementById("runButton");
-// const outputArea = document.getElementById("outputArea");
-
-// runButton.addEventListener("click", () => {
-//   const command = commandInput.value;
-
-//   // Make an AJAX request to a Flask route for command execution
-//   fetch("/execute_command", {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/x-www-form-urlencoded",
-//     },
-//     body: `command=${encodeURIComponent(command)}`,
-//   })
-//     .then((response) => response.json())
-//     .then((data) => {
-//       outputArea.value = data.result;
-//     })
-//     .catch((error) => {
-//       outputArea.value = "An error occurred while processing the command.";
-//     });
-// });
 
 $(document).ready(function () {
   $("#receive-udp-button").click(function () {
@@ -73,9 +53,9 @@ $(document).ready(function () {
         var result = response.responseJSON.result;
         $("#terminal-output").val(result);
       },
-      complete: function() {
+      complete: function () {
         $("#run-loading-spinner").addClass("visually-hidden");
-      }
+      },
     });
   });
 
@@ -92,9 +72,58 @@ $(document).ready(function () {
         var result = response.responseJSON.result;
         $("#terminal-output").val(result);
       },
-      complete: function() {
+      complete: function () {
         $("#run-loading-spinner").addClass("visually-hidden");
-      }
+      },
     });
+  });
+
+  $("#plot-button").click(function () {
+    // Show the loading spinner
+    $("#plot-spinner").removeClass("visually-hidden");
+
+    // Get the plot index from the input field
+    var plotIndex = $("#plot-index").val();
+
+    // Make the AJAX request
+    $.ajax({
+      type: "POST",
+      url: "/plot",
+      data: {
+        plotIndex: plotIndex,
+      },
+      success: function (response) {
+        // Handle the successful response here
+        // Update the HTML content with CIR data and plots
+        $("#cirIQContent").html(response.fig1);
+        $("#cirLinearPlot").html(response.fig2);
+        $("#cirDbPlot").html(response.fig3);
+        $("#errorModal").modal("hide");
+      },
+      error: function (error) {
+        // Handle the error response here
+        console.error("Error loading CIR data and plots:", error);
+        $("#errorModal .modal-body").html("An error occurred: " + error.responseJSON.error);
+        $("#errorModal").modal("show");
+      },
+      complete: function () {
+        // Hide the loading spinner when the request is complete
+        $("#plot-spinner").addClass("visually-hidden");
+      },
+    });
+  });
+
+  $("#use-default-ip-cfg-button").click(function () {
+    $("#local-ip").val("192.168.1.199");
+    $("#local-port").val("1234");
+    $("#remote-ip").val("192.168.1.128");
+    $("#remote-port").val("1234");
+  });
+
+  $("#use-self-ip-cfg-button").click(function () {
+    $("#local-ip").val("127.0.0.1");
+    $("#local-port").val("1234");
+    $("#remote-ip").val("127.0.0.1");
+    $("#remote-port").val("1234");
   });
 });

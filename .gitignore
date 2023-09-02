@@ -37,6 +37,8 @@
 
 # Dataset Output
 *.parquet
+/datasets/*
+!datasets/.placeholder
 
 # Temporary
 _tmp.*
